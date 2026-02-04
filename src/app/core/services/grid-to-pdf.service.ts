@@ -1,16 +1,15 @@
-import { inject, Injectable } from '@angular/core';
-import { Column, GridApi, IRowNode } from 'ag-grid-enterprise';
+import {Injectable} from '@angular/core';
 import pdfMake from 'pdfmake/build/pdfmake';
-import { TableCell, TableLayout, TDocumentDefinitions } from 'pdfmake/interfaces';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { HttpClient } from '@angular/common/http';
-import { AdminAnnuaireColHeader } from '@admin/components/admin-orga/admin-orga-annuaire/config/admin-orga-annuaire-grid.conf';
-import { AnnuaireColHeader } from '@astreintes/components/astreinte-annuaire/config/annuaire-gantt/astreinte-annuaire-gantt-grid.conf';
-// ici
-pdfMake.vfs = pdfFonts.vfs;
+
+import {TableCell, TableLayout, TDocumentDefinitions} from 'pdfmake/interfaces';
+import {ProductGridConfig} from '../../product/grid-config/product-grid-config';
+import {Column, GridApi, IRowNode} from 'ag-grid-community';
+
+(pdfMake as any)['vfs'] = (pdfFonts as any).vfs;
 
 export interface GridExportPdfDefinition {
-  title: AdminAnnuaireColHeader | AnnuaireColHeader;
+  title: ProductGridConfig;
   width: string;
 }
 
@@ -18,26 +17,12 @@ export interface GridExportPdfDefinition {
   providedIn: 'root',
 })
 export class GridToPdfService {
-  private readonly httpClient = inject(HttpClient);
-
   private readonly HEADER_ROW_COLOR = '#f8f8f8';
   private readonly EVEN_ROW_COLOR = '#fcfcfc';
   private readonly ODD_ROW_COLOR = '#fff';
 
   private readonly PDF_INNER_BORDER_COLOR = '#dde2eb';
   private readonly PDF_OUTER_BORDER_COLOR = '#babfc7';
-  private readonly PDF_SVG_PATH = 'assets/icons/pdf/';
-  private astreinteSvgIcon: string;
-  private urgenceSvgIcon: string;
-
-  constructor() {
-    this.getSvgIcon('Astreinte.svg').subscribe(value => {
-      this.astreinteSvgIcon = value;
-    });
-    this.getSvgIcon('Urgence.svg').subscribe(value => {
-      this.urgenceSvgIcon = value;
-    });
-  }
 
   public exportToPdf(gridApi: GridApi, columnsDef: GridExportPdfDefinition[], title: string, fileName: string) {
     const document = this.getPdfDefinitions(gridApi, columnsDef, title);
@@ -94,21 +79,13 @@ export class GridToPdfService {
     const rowsToExport: TableCell[][] = [];
     gridApi.forEachNodeAfterFilterAndSort(node => {
       const rowToExport = columnsDef.map(colDef => {
-        if (colDef.title === AdminAnnuaireColHeader.TELEPHONE) {
-          const cellValue =
-            node.data.numeroAstreinte ||
-            node.data.surcharge?.donneesPersonnelles?.telephoneMobile ||
-            node.data.surcharge?.donneesPersonnelles?.telephoneFixe ||
-            '';
-          return { fontSize: 10, text: cellValue ? cellValue.replace('+33', '0') : '', width: 10 };
-        }
 
         const column = gridApi.getAllDisplayedColumns().find(c => c.getColDef().headerName === colDef.title);
         if (column) {
           return this.mapNodeToTableCell(column, node, gridApi);
         }
 
-        return { fontSize: 10, text: '', width: 10 };
+        return {fontSize: 10, text: '', width: 10};
       });
       rowsToExport.push(rowToExport);
     });
@@ -116,44 +93,8 @@ export class GridToPdfService {
   }
 
   private mapNodeToTableCell(colKey: Column, rowNode: IRowNode, gridApi: GridApi): TableCell {
-    const colName = colKey.getColDef().headerName || '';
-    let cellValue = gridApi.getCellValue({ colKey, rowNode });
-    if (colName === AnnuaireColHeader.TAGS.valueOf()) {
-      const cellValueTags: string[] = gridApi.getCellValue({ colKey, rowNode }) ?? [];
-      const svgCell: TableCell = { stack: [] };
-      if (cellValueTags.includes('Astreinte'))
-        svgCell.stack.push({
-          svg: this.astreinteSvgIcon,
-          width: 14,
-        });
-      if (cellValueTags.includes('Urgence'))
-        svgCell.stack.push({
-          svg: this.urgenceSvgIcon,
-          width: 14,
-        });
-      return svgCell;
-    }
-    if ([AnnuaireColHeader.MODIFIE.valueOf(), AnnuaireColHeader.REMPLACEMENT.valueOf()].includes(colName)) {
-      if (cellValue === true) {
-        cellValue = 'Oui';
-      }
-      if (cellValue === false) {
-        cellValue = 'Non';
-      }
-    }
-    if (
-      [
-        AnnuaireColHeader.NUMERO_ASTREINTE.valueOf(),
-        AnnuaireColHeader.MOBILE.valueOf(),
-        AnnuaireColHeader.FIXE.valueOf(),
-      ].includes(colName)
-    ) {
-      cellValue = cellValue && (cellValue as string).replace('+33', '0');
-    }
+    let cellValue = gridApi.getCellValue({colKey, rowNode});
 
-    if (colName === AnnuaireColHeader.PERIODE) {
-      cellValue = cellValue && cellValue.debut + '-' + cellValue.fin;
-    }
     return {
       fontSize: 10,
       text: cellValue ?? '',
@@ -180,9 +121,5 @@ export class GridToPdfService {
           ? this.PDF_OUTER_BORDER_COLOR
           : this.PDF_INNER_BORDER_COLOR,
     };
-  }
-
-  private getSvgIcon(fileName: string) {
-    return this.httpClient.get(this.PDF_SVG_PATH + fileName, { responseType: 'text' });
   }
 }

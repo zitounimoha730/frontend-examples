@@ -1,6 +1,6 @@
 import {ColDef} from 'ag-grid-community';
 
-export enum ProductGridHeader {
+export enum ProductGridConfig {
   ID = 'ID',
   NAME = 'Name',
   PRICE = 'Price',
@@ -14,5 +14,5 @@ export const productColumnDefs: ColDef[] = [
   {field: 'name', headerName: 'Name', sortable: true, filter: true},
   {field: 'price', headerName: 'Price', sortable: true, filter: true},
   {field: 'category', headerName: 'Category', sortable: true, filter: true},
-  {field: 'quantity', headerName: 'QUantity', sortable: true, filter: true}
+  {field: 'quantity', headerName: 'Quantity', sortable: true, filter: true}
 ];

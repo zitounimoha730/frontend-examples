@@ -1,9 +1,11 @@
+<button (click)="exportToPdf()">Export pdf</button>
 <ag-grid-angular
-	style="width: 100%; height: 400px;"
-	class="ag-theme-alpine"
-	[rowData]="products$()"
-	[columnDefs]="columnDefs"
-	[animateRows]="true"
-	[pagination]="true"
-	[paginationPageSize]="10">
+  (gridReady)="onGridReady($event)"
+  [animateRows]="true"
+  [columnDefs]="columnDefs"
+  [paginationPageSize]="10"
+  [pagination]="true"
+  [rowData]="products$()"
+  class="ag-theme-alpine"
+  style="width: 100%; height: 400px;">
 </ag-grid-angular>
