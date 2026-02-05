@@ -1,1 +1,29 @@
+// Modern export PDF button styles
+.export-pdf-btn {
+	background: linear-gradient(90deg, #e53935 0%, #b71c1c 100%);
+	color: #fff;
+	border: none;
+	border-radius: 4px;
+	padding: 0.5em 1.25em;
+	font-size: 1rem;
+	font-weight: 500;
+	display: inline-flex;
+	align-items: center;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+	cursor: pointer;
+	transition: background 0.2s, box-shadow 0.2s, outline 0.2s;
+	outline: none;
+	margin-bottom: 1rem;
+}
+
+.export-pdf-btn:focus {
+	outline: 2px solid #1976d2;
+	outline-offset: 2px;
+}
+
+.export-pdf-btn:hover,
+.export-pdf-btn:active {
+	background: linear-gradient(90deg, #d32f2f 0%, #7f0000 100%);
+	box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+}
 /* Styles for product component */
